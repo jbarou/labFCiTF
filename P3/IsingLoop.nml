@@ -1,0 +1,22 @@
+&inParams
+! Mida del sistema
+ L = 64
+! Temperatura Inicial
+ TMin = 1.9
+! Temperatura Final
+ Tmax = 2.6
+! pas de Temperatura
+ DT = 0.05
+! Nombre de configuracions inicials diferents
+ NCONF = 128
+! Nombre de passes MC de termalitzaci'o
+ MCINI = 6000
+! Nombre de passes MC descorrelacio
+ MCD = 100
+! Nombre de passes MC totals de la simuacio'o (minim MCINI)
+ MCTOT = 11000
+/
+
+
+
+   

@@ -1,0 +1,191 @@
+# =====================================
+# Isobaric cooling protocol (LJ fluid)
+# =====================================
+
+units           lj
+dimension       3
+boundary        p p p
+atom_style      atomic
+
+# ---------- Parameters ----------
+#variable        T equal 0.5           # fixed temperature (from command line)
+variable        rhoIni equal 0.705      # initial density
+variable        rhoEnd equal 0.005      # final density
+variable        drho   equal 0.02     # debsity step
+
+variable        Nx     equal 10 # n de columnes de particules en x i y
+variable        Nz     equal 10 # n de pisos de particules (en z)
+
+variable        Nequil_hi equal 70000
+variable        Nequil    equal 10000
+variable        Nprod     equal 40000
+
+
+variable        NAveStep    equal 100
+
+# number of temperature points
+variable nRho equal floor(abs((${rhoIni}-${rhoEnd})/${drho}))+1
+
+
+
+# number of particles
+variable Ntot equal ${Nx}*${Nx}*${Nz}
+
+
+
+# number of values taken for average
+variable NAveRep equal floor(${Nprod}/${NAveStep})
+
+variable rho equal ${rhoIni}
+
+
+
+variable dir  string thermo_NVT_isoT
+variable outf string thermo_NVT_isoT/avg_N${Ntot}_T${T}.dat
+
+# clear file IF previously used
+shell mkdir ${dir}
+shell rm -f ${outf}
+
+print "#T_fixed  rho_fixed   Tavg    Tvar    Pavg    Pvar    Ravg    Rvar    Uavg   Uvar    Kavg    Kvar    Eavg    Evar  NaveRep" append ${outf}
+
+# =====================================
+# 0) System setup
+# =====================================
+
+
+# ---------- System ----------
+lattice         fcc  ${rhoIni}
+region          box block 0 ${Nx} 0 ${Nx} 0 ${Nz}
+create_box      1 box
+create_atoms    1 box
+mass            1 1.0
+
+pair_style      lj/cut 2.5
+pair_coeff      1 1 1.0 1.0 2.5
+
+neighbor        0.3 bin
+neigh_modify    delay 5
+
+timestep        0.005
+
+# ---------- Initial velocities ----------
+velocity        all create ${T} 12345 mom yes dist gaussian
+
+# =====================================
+# 1) High-T thermalization (NO OUTPUT)
+# =====================================
+
+
+fix nvt_hi all nvt temp ${T} ${T} 1.0
+
+thermo          0
+run             ${Nequil_hi}
+unfix           nvt_hi
+
+# =====================================
+# 2) Isoterms cooling loop
+# =====================================
+
+print "${nRho}"
+variable i loop ${nRho}
+
+label      loop_rho
+
+
+
+print " "
+print " -------------------------------------------------------------"
+print " =+=+=+=+=+=+= Running at T = ${T} rho=${rho} =+=+=+=+=+=+=+=+"
+print " -------------------------------------------------------------"
+print " "
+print " ## Averaging m=${NAveRep} every ${NAveStep} steps"
+print " "
+print " "
+
+# --- NVT at current temperature ---
+
+fix nvt all nvt temp ${T} ${T} 1.0
+
+# --- Equilibration ---
+#thermo          0
+#run             ${Nequil}
+
+# --- Production ---
+reset_timestep  0
+
+#thermo          ${NAveStep}
+
+thermo_style custom step temp pe ke etotal press density
+
+#fix thermo_ave all ave/time ${NAveStep} ${NAveRep} ${Nprod} c_thermo_temp c_thermo_press c_thermo_densit file thermo_P${P}.dat
+
+
+variable av_dens equal density
+variable av_pe   equal pe 
+variable av_ke   equal ke 
+variable av_et   equal ke+pe
+
+variable av_temp2 equal temp*temp
+variable av_press2 equal press*density
+variable av_dens2 equal density*density
+variable av_pe2   equal pe*pe 
+variable av_ke2   equal ke*ke
+variable av_et2   equal (ke+pe)*(ke+pe)
+
+
+
+
+fix thermo_avg all ave/time 100 100 40000 c_thermo_temp c_thermo_press v_av_dens v_av_pe v_av_ke v_av_et
+
+fix thermo_avg2 all ave/time 100 100 40000 v_av_temp2 v_av_press2 v_av_dens2 v_av_pe2 v_av_ke2 v_av_et2
+
+
+
+
+run             ${Nprod}
+
+
+variable Tavg equal f_thermo_avg[1]
+variable Pavg equal f_thermo_avg[2]
+variable Ravg equal f_thermo_avg[3]
+variable Uavg equal f_thermo_avg[4]
+variable Kavg equal f_thermo_avg[5]
+variable Eavg equal f_thermo_avg[6]
+
+
+
+variable Tvar equal f_thermo_avg2[1]-f_thermo_avg[1]*f_thermo_avg[1]
+variable Pvar equal f_thermo_avg2[2]-f_thermo_avg[2]*f_thermo_avg[2]
+variable Rvar equal f_thermo_avg2[3]-f_thermo_avg[3]*f_thermo_avg[3]
+variable Uvar equal f_thermo_avg2[4]-f_thermo_avg[4]*f_thermo_avg[4]
+variable Kvar equal f_thermo_avg2[5]-f_thermo_avg[5]*f_thermo_avg[5]
+variable Evar equal f_thermo_avg2[6]-f_thermo_avg[6]*f_thermo_avg[6]
+
+
+print "${T} ${rho} ${Tavg} ${Tvar} ${Pavg} ${Pvar} ${Ravg} ${Rvar} ${Uavg} ${Uvar} ${Kavg} ${Kvar} ${Eavg} ${Evar} ${NAveRep}" append ${outf}
+
+
+# --- Cleanup ---
+#unfix           thermo_avg
+unfix           nvt
+
+
+variable        rho equal ${rho}-${drho}
+
+variable        L equal (${Nx}*${Nx}*${Nz}*${rhoIni}/${rho})^(1.0/3.0)
+
+print "${L}"
+
+
+change_box      all x final 0 ${L} y final 0 ${L} z final 0 ${L} remap
+
+
+next            i
+jump            SELF loop_rho
+
+
+print "" append ${outf}
+print "" append ${outf}
+
+

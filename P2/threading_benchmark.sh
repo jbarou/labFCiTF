@@ -10,6 +10,9 @@ export OMP_PLACES=cores
 
 echo "MPI OMP TotalCores Time(s)"
 
+
+mkdir testOMP
+
 for MPI in 1 2 4; do
   for OMP in 1 2 4; do
 
@@ -23,13 +26,13 @@ for MPI in 1 2 4; do
     echo "Running MPI=$MPI OMP=$OMP"
 
     mpirun -np $MPI $LAMMPS -sf omp -pk omp $OMP -in $INPUT \
-      | tee out_mpi${MPI}_omp${OMP}.log
+      | tee testOMP/out_mpi${MPI}_omp${OMP}.log
 
     # Extract total wall time
     grep "Loop time of" out_mpi${MPI}_omp${OMP}.log
     SECS=$(grep "Loop time of" out_mpi${MPI}_omp${OMP}.log | awk '{print $4}')
 
-    echo "$MPI $OMP $TOTAL | $SECS" >> scaling_results.dat
+    echo "$MPI $OMP $TOTAL | $SECS" >> testOMP/scaling_results.dat
 
   done
 done

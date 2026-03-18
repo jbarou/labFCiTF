@@ -21,10 +21,10 @@ variable        Tlo equal 0.9         # temperatura inferior                    
 variable        dT  equal 0.01        # pas de temperature                                                  #
                                                                                                             #
 # ---- variables de temps de termalització i producció de dades                                             #
-variable        Nequil_hi equal 50000   # N. de passes d'int. per a termalitzar per primer cop.             #
-variable        Nequil    equal 50000   # N. de passes d'int. per a termalitzar després de cada salt drho.  #
+variable        Nequil_hi equal 10000   # N. de passes d'int. per a termalitzar per primer cop.             #
+variable        Nequil    equal 40000   # N. de passes d'int. per a termalitzar després de cada salt drho.  #
 variable        Nprod     equal 10000   # N. de passes durant les quals pendrem mesures.                    #
-variable        NAveStep    equal 100   # Cada quants passos de temps prenem mesures                        #
+variable        NAveStep  equal 200     # Cada quants passos de temps prenem mesures                        #
                                                                                                             #
 # ---- llavor de la conf. inicial de velocitats                                                             #
 variable        vSeed     equal 12345  # llavor inicial per definir les velocitats com aleatories.          #
@@ -56,10 +56,17 @@ variable i loop ${nT}
 
 
 # clear file IF previously used
-shell mkdir thermo_NPT/
-shell rm -f thermo_NPT/avg_N${Ntot}P${P}.dat
 
-print "#T_fixed    P_fixed   Tavg    Tvar    Pavg    Pvar    Ravg    Rvar    Uavg   Uvar    Kavg    Kvar    Eavg    Evar  NaveRep" append thermo_NPT/avg_N${Ntot}P${P}.dat
+
+variable dir  string thermo_NPT_isoP
+variable outf string thermo_NPT_isoP/avg_N${Ntot}P${P}.dat
+
+
+# crea el directori i borra l'arxiu si ja existeix
+shell mkdir ${dir}
+shell rm -f ${outf}
+
+print "#T_fixed    P_fixed   Tavg    Tvar    Pavg    Pvar    Ravg    Rvar    Uavg   Uvar    Kavg    Kvar    Eavg    Evar  NaveRep" append ${outf}
 
 
 
@@ -165,9 +172,9 @@ variable av_et2   equal (ke+pe)*(ke+pe)
 
 
 
-fix thermo_avg all ave/time 100 100 10000 c_thermo_temp c_thermo_press v_av_dens v_av_pe v_av_ke v_av_et
+fix thermo_avg all ave/time ${NAveStep} ${NAveRep} ${Nprod} c_thermo_temp c_thermo_press v_av_dens v_av_pe v_av_ke v_av_et
 
-fix thermo_avg2 all ave/time 100 100 10000 v_av_temp2 v_av_press2 v_av_dens2 v_av_pe2 v_av_ke2 v_av_et2
+fix thermo_avg2 all ave/time ${NAveStep} ${NAveRep} ${Nprod} v_av_temp2 v_av_press2 v_av_dens2 v_av_pe2 v_av_ke2 v_av_et2
 
 
 
@@ -192,15 +199,16 @@ variable Kvar equal f_thermo_avg2[5]-f_thermo_avg[5]*f_thermo_avg[5]
 variable Evar equal f_thermo_avg2[6]-f_thermo_avg[6]*f_thermo_avg[6]
 
 
-print "${T} ${P} ${Tavg} ${Tvar} ${Pavg} ${Pvar} ${Ravg} ${Rvar} ${Uavg} ${Uvar} ${Kavg} ${Kvar} ${Eavg} ${Evar} ${NAveRep}" append thermo_NPT/avg_N${Ntot}P${P}.dat
+print "${T} ${P} ${Tavg} ${Tvar} ${Pavg} ${Pvar} ${Ravg} ${Rvar} ${Uavg} ${Uvar} ${Kavg} ${Kvar} ${Eavg} ${Evar} ${NAveRep}" append ${outf}
 
 # =====================================
 # 6.3) Canvi de T i sortida del loop
 # =====================================
 
 # --- Cleanup ---
-#unfix           thermo_avg
-unfix           npt
+unfix           thermo_avg
+unfix           thermo_avg2
+unfix npt
 
 next            i
 jump            SELF loop_Tdown
@@ -267,9 +275,9 @@ variable av_et2   equal (ke+pe)*(ke+pe)
 
 
 
-fix thermo_avg all ave/time 100 100 10000 c_thermo_temp c_thermo_press v_av_dens v_av_pe v_av_ke v_av_et
+fix thermo_avg all ave/time ${NAveStep} ${NAveRep} ${Nprod} c_thermo_temp c_thermo_press v_av_dens v_av_pe v_av_ke v_av_et
 
-fix thermo_avg2 all ave/time 100 100 10000 v_av_temp2 v_av_press2 v_av_dens2 v_av_pe2 v_av_ke2 v_av_et2
+fix thermo_avg2 all ave/time ${NAveStep} ${NAveRep} ${Nprod} v_av_temp2 v_av_press2 v_av_dens2 v_av_pe2 v_av_ke2 v_av_et2
 
 
 
@@ -294,7 +302,7 @@ variable Kvar equal f_thermo_avg2[5]-f_thermo_avg[5]*f_thermo_avg[5]
 variable Evar equal f_thermo_avg2[6]-f_thermo_avg[6]*f_thermo_avg[6]
 
 
-print "${T} ${P} ${Tavg} ${Tvar} ${Pavg} ${Pvar} ${Ravg} ${Rvar} ${Uavg} ${Uvar} ${Kavg} ${Kvar} ${Eavg} ${Evar} ${NAveRep}" append thermo_NPT/avg_N${Ntot}P${P}.dat
+print "${T} ${P} ${Tavg} ${Tvar} ${Pavg} ${Pvar} ${Ravg} ${Rvar} ${Uavg} ${Uvar} ${Kavg} ${Kvar} ${Eavg} ${Evar} ${NAveRep}" append ${outf}
 
 
 # =====================================
@@ -302,8 +310,9 @@ print "${T} ${P} ${Tavg} ${Tvar} ${Pavg} ${Pvar} ${Ravg} ${Rvar} ${Uavg} ${Uvar}
 # =====================================
 
 # --- Cleanup ---
-#unfix           thermo_avg
-unfix           npt
+unfix           thermo_avg
+unfix           thermo_avg2
+unfix npt
 
 next            i
 jump            SELF loop_Tup

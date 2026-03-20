@@ -1,13 +1,28 @@
-# --- INPUT VARIABLES ---
+# --- INPUT VARIABLES ------------------------------------------------------------------------- #
+# MODIFIQUEU NOMÉS AQUESTES VARIABLES                                                           #
+                                                                                                #	
+variable Tfix   equal 0.5      # temperatura (fixe)                                             #
+variable rho    equal 0.1      # densitat (fixe)                                                #
+variable Nx     equal 7        # nombre lateral de particules (nombre total Nx*Nx*Nx)           #
+variable iTime  equal 100000   # total de passes d'integració                                   #
+variable dtPos  equal 500      # cada quantes passes d'integració volquem la configuració       #
+variable dtTher equal 500      # cada quantes passes d'integració agafem valors termodinàmics   #
+                                                                                                #	
+(No modifiqueu res més a partir d'aquí)                                                         #		
+------------------------------------------------------------------------------------------------#
 
-variable Tfix   equal 0.5
-#variable rho   equal 0.8442
-variable rho    equal 0.1
-variable Nx     equal 7
-variable iTime  equal 100000
-variable dtPos  equal 500
-variable dtTher equal 500
 
+## --- Crea i escriu als arxius de sortida (PROMITJOS DE MESURES TERMODINÀMIQUES) ----
+
+variable dir  string seq_NVT
+variable outf string ${dir}/traj_T${Tfix}_rho${rho}_N${Nx}x${Nx}x${Nx}.lammpstrj
+
+variable outfTherm string ${dir}/thermo_T${Tfix}_rho${rho}_N${Nx}x${Nx}x${Nx}.dat
+
+# --- crea el directori i borra l'arxiu si ja existeix ---
+shell mkdir ${dir}
+shell rm -f ${outf}
+shell rm -f ${outfTherm}
 
 
 # --- SYSTEM SETUP ---
@@ -21,8 +36,6 @@ create_box 1 box
 create_atoms 1 box
 mass 1 1.0
 
-
-
 pair_style lj/cut 2.5
 pair_coeff 1 1 1.0 1.0 2.5
 
@@ -33,28 +46,17 @@ neigh_modify delay 5
 velocity all create ${Tfix} 12333 mom yes dist gaussian
 
 
-
-#### DOESN´T WORK
-## --- Compute RDF ---
-#compute my_rdf all rdf 100 5.0
-## --- Output RDF to separate file ---
-#fix my_rdf all ave/time 100 10 1000 c_rdf_all[*] file rdf_T${Tfix}_rho${rho}_N${Nx}x${Nx}x${Nx}.dat mode vector
-
-
 # --- COMPUTE ENERGIES ---
 compute keatom all ke/atom
 compute peatom all pe/atom
 
 
 # --- DUMP ---
-dump 1 all custom ${dtPos} traj_T${Tfix}_rho${rho}_N${Nx}x${Nx}x${Nx}.lammpstrj id type x y z c_keatom c_peatom
-
-
+dump 1 all custom ${dtPos} ${outf} id type x y z c_keatom c_peatom
 
 
 # --- INTEGRATOR ---
 fix 1 all nvt temp ${Tfix} ${Tfix} 1.0
-
 
 
 # --- USER VARIABLES FOR THERMO ---
@@ -66,16 +68,12 @@ variable etotalvar equal etotal
 variable pressvar equal press
 variable densvar equal density
 
-
-
+# --- mitjanes termodinàmiques ---
 thermo ${dtTher}
 thermo_style custom step temp pe ke etotal press density
 
 # --- PRINT THERMO INTO FILE ---
-fix thermo_print all print ${dtTher} "${stepvar} ${tempvar} ${pevar} ${kevar} ${etotalvar} ${pressvar} ${densvar}" file thermo_T${Tfix}_rho${rho}_N${Nx}x${Nx}x${Nx}.dat screen no
-
-
-
+fix thermo_print all print ${dtTher} "${stepvar} ${tempvar} ${pevar} ${kevar} ${etotalvar} ${pressvar} ${densvar}" file ${outfTherm} screen no
 
 timestep 0.005
 run ${iTime}

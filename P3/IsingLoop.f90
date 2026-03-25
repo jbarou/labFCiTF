@@ -5,7 +5,7 @@
 !     EV 05-10-2019
 !     EV 03-12-2020 (Revisat)
 !     EV 03-11-2022 (Revisat)
-!     JB 20-05-2024 (nova versiÛ) 
+!     JB 20-05-2024 (nova versi√≥) 
 !     JB 17-06-2024 (Revisat)
 !     JB 1-03-2025  (optimitzat i parallel OMP)
 !    
@@ -33,7 +33,7 @@ program IsingLoop
 !
       INTEGER (kind=2), dimension (:,:), allocatable :: S
 !
-!     Vector for periodic boundary conditions
+!     Vector per condicions periodiques de contorn
 !
       INTEGER (kind=4), dimension (:), allocatable :: PBC
 !
@@ -63,11 +63,11 @@ program IsingLoop
 !
 !     Variables per fer els promitjos d' interes
 !  
-! --- EstadÌstiques Welford globals per temperatura
+! --- Estad√≠stiques Welford globals per temperatura
       INTEGER (kind=8) ::  COUNT_AM, COUNT_E
       Double Precision ::  MEAN_E,  M2_E,  M2_AM,  MEAN_AM
 
-! --- (si emprem OpenMP) estadÌstiques locals per fil (es faran private)
+! --- (si emprem OpenMP) estad√≠stiques locals per fil (es faran private)
       INTEGER (kind=8) ::  TCOUNT
       Double Precision ::  TMEAN_E, TM2_E, TM2_AM, TMEAN_AM
 
@@ -157,7 +157,7 @@ program IsingLoop
             TEMP=TMin+(itemp-1)*Dt
             PRINT '("TEMP = ", F5.3, " ( ",F5.1 ," % )")', TEMP,  itemp*100.0d0/ntemp
       !
-      !     vector with the transitions probabilities
+      !     dos unics valors d√≠nteres per a les probabilitats de transici√≥ (DE=4,8)
       !
 
             w4 = exp(-4.0d0 / TEMP)
@@ -180,14 +180,14 @@ program IsingLoop
 
 
 
-            ! --- Bucle de configuracions (paral∑lel si -fopenmp; serial si no)
+            ! --- Bucle de configuracions (paral¬∑lel si -fopenmp; serial si no)
             !$omp parallel default(none) &
             !$omp& shared(L,PBC,TEMP,w4,w8,N,MCINI,MCD,MCTOT,NCONF,ITEMP, &
             !$omp&        MEAN_E,M2_E,COUNT_E,COUNT_AM,M2_AM, MEAN_AM) &
             !$omp& private(ICONF,I,J,IPAS,IMC,S,ENE,MAG,SUMA,DE,accept, &
             !$omp&         IJ,Sold,TCOUNT,TMEAN_E,TM2_E,TM2_AM,TMEAN_AM,DELTA)
 
-            ! -- Inicialitza estadÌstiques locals de fil
+            ! -- Inicialitza estad√≠stiques locals de fil
                   TCOUNT  = 0_8
                   TMEAN_E = 0.0D0
                   TM2_E   = 0.0D0
@@ -197,7 +197,7 @@ program IsingLoop
             !$omp do schedule(static)
                   DO ICONF=1,NCONF,1
 
-            !        Llavor independent per simulaciÛ/temperatura (determinista)
+            !        Llavor independent per simulaci√≥/temperatura (determinista)
                      call init_genrand(12345 + 1000*ITEMP + ICONF*2)
 
             !        ---- array de spins privat per fil ----
@@ -214,7 +214,7 @@ program IsingLoop
                        ENDDO
                      ENDDO
 
-            !        Energia i magnetitzaciÛ inicials
+            !        Energia i magnetitzaci√≥ inicials
                      ENE = ENERG(S,L,PBC)
                      MAG = MAGNE(S,L)
 
@@ -224,20 +224,20 @@ program IsingLoop
             !           N intents
                         DO IPAS = 1,N
 
-            !             SelecciÛ aleatoria d'un lloc (1 RNG)
+            !             Selecci√≥ aleatoria d'un lloc (1 RNG)
                            IJ = int(genrand_real2()*N)
                            I  = IJ / L + 1
                            J  = IJ - (I-1)*L + 1
 
                            Sold = S(I,J)
 
-            !              Suma veÔns (PBC per vector)
+            !              Suma ve√Øns (PBC per vector)
                            SUMA = S(PBC(I+1),J) + S(I,PBC(J+1)) + S(I,PBC(J-1)) + S(PBC(I-1),J)
 
             !              Canvi d'energia
                            DE = 2*Sold*SUMA
 
-            !              DecisiÛ Metropolis (branching compacte)
+            !              Decisi√≥ Metropolis (branching compacte)
                            select case (DE)
                              case (:0)                   ! DE <= 0
                                accept = .true.
@@ -246,7 +246,7 @@ program IsingLoop
                              case (8)
                                accept = (genrand_real2() .LT. w8)
                              case default
-                               accept = .false.          ! DE {+4,+8} ˙nics positius possibles
+                               accept = .false.          ! DE {+4,+8} √∫nics positius possibles
                            end select
 
                            if (accept) then
@@ -282,7 +282,7 @@ program IsingLoop
                   ENDDO    ! ICONF
             !$omp end do
 
-            ! --- FusiÛ Welford (per fil -> globals). Per seguretat, si es creuen 2 arribares alhora.
+            ! --- Fusi√≥ Welford (per fil -> globals). Per seguretat, si es creuen 2 arribares alhora.
             !$omp critical
                   call WELFORD_MERGE(COUNT_E, MEAN_E, M2_E, TCOUNT, TMEAN_E, TM2_E)
                   call WELFORD_MERGE(COUNT_AM, MEAN_AM, M2_AM, TCOUNT, TMEAN_AM, TM2_AM)
@@ -292,7 +292,7 @@ program IsingLoop
 
 
                                     
-      ! --- Vari‡ncies (per espÌn; evitem mesures buides (per si de cas))
+      ! --- Vari√†ncies (per esp√≠n; evitem mesures buides (per si de cas))
             if (  COUNT_E    .GT. 0_8) then
               VARE = M2_E / DBLE(  COUNT_E   )
             else
@@ -307,7 +307,7 @@ program IsingLoop
 
 
 
-      ! --- ForÁa no-negativitat per rodoneig
+      ! --- For√ßa no-negativitat per rodoneig (no hauria d'arribar a passar)
       !     VARE = MAX(0.0D0, VARE)
       !     VARM = MAX(0.0D0, VARM)
 
@@ -317,7 +317,6 @@ program IsingLoop
               write(*,*) "WARNING: COUNT_E != COUNT_AM at TEMP=", TEMP, COUNT_E, COUNT_AM
             end if
       ! --- Sortida d'arxiu
-
             WRITE(13,*) N, TEMP,   COUNT_AM   , MEAN_E, VARE, MEAN_AM, VARM
                   
       !

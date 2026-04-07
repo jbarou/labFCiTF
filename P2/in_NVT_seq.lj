@@ -25,7 +25,7 @@ shell rm -f ${outf}
 shell rm -f ${outfTherm}
 
 
-# --- SYSTEM SETUP ---
+# --- init. del sistema de part. ---
 units lj
 atom_style atomic
 boundary p p p
@@ -42,24 +42,24 @@ pair_coeff 1 1 1.0 1.0 2.5
 neighbor 0.3 bin
 neigh_modify delay 5
 
-# --- INITIALIZE VELOCITIES ---
+# --- inic. de velocitats ---
 velocity all create ${Tfix} 12333 mom yes dist gaussian
 
 
-# --- COMPUTE ENERGIES ---
+# --- comput d'energies per particula ---
 compute keatom all ke/atom
 compute peatom all pe/atom
 
 
-# --- DUMP ---
+# --- dump de posició ---
 dump 1 all custom ${dtPos} ${outf} id type x y z c_keatom c_peatom
 
 
-# --- INTEGRATOR ---
+# --- integrador ---
 fix 1 all nvt temp ${Tfix} ${Tfix} 1.0
 
 
-# --- USER VARIABLES FOR THERMO ---
+# --- def. aux. per mesures termodin. ---
 variable stepvar equal step
 variable tempvar equal temp
 variable pevar equal pe
@@ -72,7 +72,7 @@ variable densvar equal density
 thermo ${dtTher}
 thermo_style custom step temp pe ke etotal press density
 
-# --- PRINT THERMO INTO FILE ---
+# --- escriu mitjanes termo. ---
 fix thermo_print all print ${dtTher} "${stepvar} ${tempvar} ${pevar} ${kevar} ${etotalvar} ${pressvar} ${densvar}" file ${outfTherm} screen no
 
 timestep 0.005

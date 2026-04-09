@@ -52,7 +52,7 @@ def uf_find(parent, x):
         x = parent[x]
     return x
 
-@nb.njit(cache=True)
+@njit(cache=True)
 def uf_union(parent, size, a, b):
     ra = uf_find(parent, a)
     rb = uf_find(parent, b)
@@ -63,7 +63,7 @@ def uf_union(parent, size, a, b):
     parent[rb] = ra
     size[ra] += size[rb]
 
-@nb.njit(cache=True)
+@njit(cache=True)
 def build_percolation(occ, L):
     """
     Parameters

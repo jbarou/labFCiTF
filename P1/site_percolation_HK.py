@@ -293,7 +293,7 @@ class SitePercolation2D:
         """
         self._build()
         L = self.L
-        labels_flat = np.zeros(L * L, dtype=np.int64)
+        labels_flat = -np.ones(L * L, dtype=np.int64)
         labels_flat[self._occ_sites] = self._root_of_site[self._occ_sites]
         return labels_flat.reshape((L, L))
 

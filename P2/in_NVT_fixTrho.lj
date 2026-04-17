@@ -1,8 +1,8 @@
 # --- INPUT VARIABLES ------------------------------------------------------------------------- #
 # MODIFIQUEU NOMÉS AQUESTES VARIABLES                                                           #
                                                                                                 #	
-variable Tfix   equal 0.5      # temperatura (fixe)                                             #
-variable rho    equal 0.1      # densitat (fixe)                                                #
+#variable T   equal 0.5        # temperatura (fixe)  s'entra per linia de comandes              #
+#variable rho    equal 0.1     # densitat (fixe)  s'entra per linia de comandes                 #
 variable Nx     equal 7        # nombre lateral de particules (nombre total Nx*Nx*Nx)           #
 variable iTime  equal 100000   # total de passes d'integració                                   #
 variable dtPos  equal 500      # cada quantes passes d'integració volquem la configuració       #
@@ -18,9 +18,9 @@ variable        vSeed     equal 12345  # llavor inicial per definir les velocita
 ## --- Crea i escriu als arxius de sortida (PROMITJOS DE MESURES TERMODINÀMIQUES) ----
 
 variable dir  string seq_NVT
-variable outf string ${dir}/traj_T${Tfix}_rho${rho}_N${Nx}x${Nx}x${Nx}.lammpstrj
+variable outf string ${dir}/traj_T${T}_rho${rho}_N${Nx}x${Nx}x${Nx}.lammpstrj
 
-variable outfTherm string ${dir}/thermo_T${Tfix}_rho${rho}_N${Nx}x${Nx}x${Nx}.dat
+variable outfTherm string ${dir}/thermo_T${T}_rho${rho}_N${Nx}x${Nx}x${Nx}.dat
 
 # --- crea el directori i borra l'arxiu si ja existeix ---
 shell mkdir ${dir}
@@ -46,7 +46,7 @@ neighbor 0.3 bin
 neigh_modify delay 5
 
 # --- inic. de velocitats ---
-velocity all create ${Tfix} ${vSeed} mom yes dist gaussian
+velocity all create ${T} ${vSeed} mom yes dist gaussian
 
 
 # --- comput d'energies per particula ---
@@ -59,7 +59,7 @@ dump 1 all custom ${dtPos} ${outf} id type x y z c_keatom c_peatom
 
 
 # --- integrador ---
-fix 1 all nvt temp ${Tfix} ${Tfix} 1.0
+fix 1 all nvt temp ${T} ${T} 1.0
 
 
 # --- def. aux. per mesures termodin. ---

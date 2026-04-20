@@ -11,8 +11,8 @@ variable dtTher equal 500      # cada quantes passes d'integració agafem valors
 # ---- llavor de la conf. inicial de velocitats                                                 #
 variable        vSeed     equal 12345  # llavor inicial per definir les velocitats com aleatorie#
                                                                                                 #	
-(No modifiqueu res més a partir d'aquí)                                                         #		
-------------------------------------------------------------------------------------------------#
+#(No modifiqueu res més a partir d'aquí)                                                        #		
+#-----------------------------------------------------------------------------------------------#
 
 
 ## --- Crea i escriu als arxius de sortida (PROMITJOS DE MESURES TERMODINÀMIQUES) ----

@@ -5,23 +5,23 @@
 #variable P    equal           # densitat (fixe)  s'entra per linia de comandes                 #
 variable Nx     equal 7        # nombre lateral de particules (nombre total Nx*Nx*Nz)           #
 variable Nz     equal 20       # nombre lateral de particules (nombre total Nx*Nx*Nz)           #
-variable iTime  equal 60000    # total de passes d'integració                                   #
+variable iTime  equal 30000    # total de passes d'integració                                   #
 variable dtPos  equal 500      # cada quantes passes d'integració volquem la configuració       #
 variable dtTher equal 500      # cada quantes passes d'integració agafem valors termodinàmics   #
                                                                                                 #
 # ---- llavor de la conf. inicial de velocitats                                                 #
 variable        vSeed     equal 12345  # llavor inicial per definir les velocitats com aleatorie#
                                                                                                 #	
-# (No modifiqueu res més a partir d'aquí)                                                       #		
+#(No modifiqueu res més a partir d'aquí)                                                        #		
 #-----------------------------------------------------------------------------------------------#
 
 
 ## --- Crea i escriu als arxius de sortida (PROMITJOS DE MESURES TERMODINÀMIQUES) ----
 
 variable dir  string seq_NPT
-variable outf string ${dir}/traj_T${T}_rho${rho}_N${Nx}x${Nx}x${Nx}.lammpstrj
+variable outf string ${dir}/traj_T${T}_P${P}_N${Nx}x${Nx}x${Nx}.lammpstrj
 
-variable outfTherm string ${dir}/thermo_T${T}_rho${rho}_N${Nx}x${Nx}x${Nx}.dat
+variable outfTherm string ${dir}/thermo_T${T}_P${P}_N${Nx}x${Nx}x${Nx}.dat
 
 # --- crea el directori i borra l'arxiu si ja existeix ---
 shell mkdir ${dir}
@@ -34,7 +34,6 @@ units lj
 atom_style atomic
 boundary p p p
 
-#lattice fcc ${rho}
 lattice fcc 0.3
 region box block 0 ${Nx} 0 ${Nx} 0 ${Nz}
 create_box 1 box

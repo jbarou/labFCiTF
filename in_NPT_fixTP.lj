@@ -1,0 +1,93 @@
+## =====================================
+## Protocol isobar a T P fixes (fluid LJ)
+## =====================================
+## LLegeix T per linia de comandes
+## E.g.:
+## lmp -var T 0.65 -var P 0.3 -in in_NPT_fixTP.lj
+
+# --- INPUT VARIABLES ------------------------------------------------------------------------- #
+# MODIFIQUEU NOMÉS AQUESTES VARIABLES                                                           #
+                                                                                                #	
+#variable T   equal            # temperatura (fixe)  s'entra per linia de comandes              #
+#variable P    equal           # densitat (fixe)  s'entra per linia de comandes                 #
+variable Nx     equal 7        # nombre lateral de particules (nombre total Nx*Nx*Nz)           #
+variable Nz     equal 20       # nombre lateral de particules (nombre total Nx*Nx*Nz)           #
+variable iTime  equal 30000    # total de passes d'integració                                   #
+variable dtPos  equal 500      # cada quantes passes d'integració volquem la configuració       #
+variable dtTher equal 10       # cada quantes passes d'integració agafem valors termodinàmics   #
+                                                                                                #
+# ---- llavor de la conf. inicial de velocitats                                                 #
+variable        vSeed     equal 12345  # llavor inicial per definir les velocitats com aleatorie#
+                                                                                                #	
+#(No modifiqueu res més a partir d'aquí)                                                        #		
+#-----------------------------------------------------------------------------------------------#
+
+
+## --- Crea i escriu als arxius de sortida (PROMITJOS DE MESURES TERMODINÀMIQUES) ----
+
+variable dir  string seq_NPT
+variable outf string ${dir}/traj_T${T}_P${P}_N${Nx}x${Nx}x${Nx}.lammpstrj
+
+variable outfTherm string ${dir}/thermo_T${T}_P${P}_N${Nx}x${Nx}x${Nx}.dat
+
+# --- crea el directori i borra l'arxiu si ja existeix ---
+shell mkdir ${dir}
+shell rm -f ${outf}
+shell rm -f ${outfTherm}
+
+
+# --- init. del sistema de part. ---
+units lj
+atom_style atomic
+boundary p p p
+
+lattice fcc 0.3
+region box block 0 ${Nx} 0 ${Nx} 0 ${Nz}
+create_box 1 box
+create_atoms 1 box
+mass 1 1.0
+
+
+
+pair_style lj/cut 2.5
+pair_coeff 1 1 1.0 1.0 2.5
+
+neighbor 0.3 bin
+neigh_modify delay 5
+
+# --- inic. de velocitats ---
+velocity all create ${T} ${vSeed} mom yes dist gaussian
+
+
+# --- comput d'energies per particula ---
+compute keatom all ke/atom
+compute peatom all pe/atom
+
+
+# --- dump de posició ---
+dump 1 all custom ${dtPos} ${outf} id type x y z c_keatom c_peatom
+
+
+# --- Integrador ---
+ fix 1 all npt temp ${T} ${T} 1 iso ${P} ${P} 5.0
+
+
+
+# --- def. aux. per mesures termodin. ---
+variable stepvar equal step
+variable tempvar equal temp
+variable pevar equal pe
+variable kevar equal ke
+variable etotalvar equal etotal
+variable pressvar equal press
+variable densvar equal density
+
+# --- mitjanes termodinàmiques ---
+thermo 0
+thermo_style custom step temp pe ke etotal press density
+
+# --- escriu mitjanes termo. ---
+fix thermo_print all print ${dtTher} "${stepvar} ${tempvar} ${densvar} ${pressvar} ${pevar} ${kevar} ${etotalvar}" file ${outfTherm} screen no
+
+timestep 0.005
+run ${iTime}

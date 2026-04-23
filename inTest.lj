@@ -1,0 +1,51 @@
+units           lj
+dimension       3
+boundary        p p p
+atom_style      atomic
+
+
+
+# Create simulation box
+#lattice         fcc 0.8442
+lattice         fcc 0.4
+region          box block 0 5 0 5 0 5
+create_box      1 box
+create_atoms    1 box
+# Mass of particles (reduced units = 1)
+mass 1 1.0
+
+# Define interactions
+pair_style      lj/cut 2.5
+pair_coeff      1 1 1.0 1.0 2.5
+
+# Neighbor list
+neighbor        0.3 bin
+neigh_modify    delay 5
+
+
+# Initialize velocities
+velocity        all create 1.0 87287 loop geom
+
+# Time integration
+#fix             1 all nve
+fix 1 all nvt temp 0.5 0.5 0.5
+
+
+# Thermodynamic output
+thermo          100
+thermo_style    custom step temp pe ke etotal press density
+
+
+
+compute keatom all ke/atom
+compute peatom all pe/atom
+
+# Trajectory output
+dump 1 all custom 100 traj_test.lammpstrj id type x y z c_keatom c_peatom
+
+
+# Time step
+timestep        0.005
+
+# Run simulation
+run             10000

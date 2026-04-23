@@ -14,18 +14,18 @@
 ## MODIFICA aquí les variables que consideris necesaries per les teves simulacions                          #
                                                                                                             #
 # ---- mida del sistema                                                                                     #
-variable        Nx     equal 4 # n de columnes de particules en x y i z                                     #
+variable        Nx     equal 8 # n de columnes de particules en x y i z                                     #
                                                                                                             #
 # ---- variables de la rampa de densitat. (explora d'altes a baixes)                                        #
-variable    rhoIni equal 0.71      # densitat inicial                                                       #
-variable    rhoEnd equal 0.02      # densitat final                                                         #
-variable    drho   equal 0.01      # pas de decreiexement                                                   #
+variable    rhoIni equal       # (cal emplenar)  densitat inicial  (alta)                                                     #
+variable    rhoEnd equal       # (cal emplenar)  densitat final  (baixa)                                                       #
+variable    drho   equal       # (cal emplenar)  pas de decreiexement                                                   #
                                                                                                             #
 # ---- variables de temps de termalització i producció de dades                                             #
-variable        Nequil_hi equal 70000   # N. de passes d'int. per a termalitzar per primer cop.             #
-variable        Nequil    equal 10000   # N. de passes d'int. per a termalitzar després de cada salt drho.  #
-variable        Nprod     equal 40000   # N. de passes durant les quals pendrem mesures.                    #
-variable        NAveStep    equal 100   # Cada quants passos de temps prenem mesures                        #
+variable        Nequil_hi equal    # (cal emplenar) N. de passes d'int. per a termalitzar per primer cop.             #
+variable        Nequil    equal    # (cal emplenar) N. de passes d'int. per a termalitzar després de cada salt drho.  #
+variable        Nprod     equal    # (cal emplenar) N. de passes durant les quals pendrem mesures.                    #
+variable        NAveStep  equal    # (cal emplenar) Cada quants passos de temps prenem mesures                        #
                                                                                                             #
 # ---- llavor de la conf. inicial de velocitats                                                             #
 variable        vSeed     equal 12345  # llavor inicial per definir les velocitats com aleatories.          #
@@ -192,7 +192,8 @@ print "${T} ${rho} ${Tavg} ${Tvar} ${Pavg} ${Pvar} ${Ravg} ${Rvar} ${Uavg} ${Uva
 
 
 # --- Cleanup ---
-#unfix           thermo_avg
+unfix           thermo_avg
+unfix           thermo_avg2
 unfix           nvt
 
 

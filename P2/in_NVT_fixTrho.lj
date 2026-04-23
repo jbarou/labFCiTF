@@ -1,3 +1,10 @@
+## =====================================
+## Protocol isocor a T rho fixes (fluid LJ)
+## =====================================
+## LLegeix T per linia de comandes
+## E.g.:
+## lmp -var T 0.65 -var rho 0.3 -in in_NPT_fixTP.lj
+
 # --- INPUT VARIABLES ------------------------------------------------------------------------- #
 # MODIFIQUEU NOMÉS AQUESTES VARIABLES                                                           #
                                                                                                 #	
@@ -6,7 +13,7 @@
 variable Nx     equal 7        # nombre lateral de particules (nombre total Nx*Nx*Nx)           #
 variable iTime  equal 100000   # total de passes d'integració                                   #
 variable dtPos  equal 500      # cada quantes passes d'integració volquem la configuració       #
-variable dtTher equal 500      # cada quantes passes d'integració agafem valors termodinàmics   #
+variable dtTher equal 10       # cada quantes passes d'integració agafem valors termodinàmics   #
                                                                                                 #
 # ---- llavor de la conf. inicial de velocitats                                                 #
 variable        vSeed     equal 12345  # llavor inicial per definir les velocitats com aleatorie#
@@ -72,11 +79,11 @@ variable pressvar equal press
 variable densvar equal density
 
 # --- mitjanes termodinàmiques ---
-thermo ${dtTher}
+thermo 0
 thermo_style custom step temp pe ke etotal press density
 
 # --- escriu mitjanes termo. ---
-fix thermo_print all print ${dtTher} "${stepvar} ${tempvar} ${pevar} ${kevar} ${etotalvar} ${pressvar} ${densvar}" file ${outfTherm} screen no
+fix thermo_print all print ${dtTher} "${stepvar} ${tempvar} ${densvar} ${pressvar} ${pevar} ${kevar} ${etotalvar}" file ${outfTherm} screen no
 
 timestep 0.005
 run ${iTime}

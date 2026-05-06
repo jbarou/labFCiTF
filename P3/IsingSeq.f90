@@ -13,25 +13,26 @@
 !     *                                                                *
 !     ******************************************************************
 !
-!     compile with
-!
+!     compila
 !     > gfortran -O3 -o IsingSeq IsingSeq.f90
 !
-!     * Variable declaration ********************************************
+!     executa
+!     > ./IsingSeq  L TEMP MCTOT
+!
+!     * declaracio de variables ********************************************
 !
       IMPLICIT NONE
 !
 !     Input data
 !
       integer (kind=4) :: L
-!!      PARAMETER (L=48)
       double precision TEMP, W4, W8
       integer (kind=4) :: SEED
       integer (kind=4) :: MCTOT
       double precision genrand_real2
       logical accept
 !
-!     Spin matrix
+!     Matriu de spins
 !
       INTEGER (kind=2), dimension (:,:), allocatable :: S
       integer (kind=2) :: Sold
@@ -62,7 +63,7 @@
       CHARACTER*32 sL, sTEMP, sMCTOT
 !
 !     dades per linia de comandes
-!     > IsingSeq  L TEMP MCTOT
+!
 
       print*,"use: $ IsingSeq  L TEMP MCTOT"
 
@@ -137,7 +138,7 @@
       IMC=0
 
       WRITE(*,*) 'MC=',IMC, ' ENERGIA =', ENE, ENEBIS, 'MAGNE =',MAG
-      WRITE(12,*) IMC, ENE, ENEBIS, MAG, N
+      WRITE(12,*) IMC, ENE, MAG, N
 !
 !     Main Monte Carlo loop
 !

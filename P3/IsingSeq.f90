@@ -9,6 +9,7 @@
 !     *     EV 03-12-2010 (Revisat)                                    *
 !     *     EV 03-11-2022 (Revisat)                                    *
 !     *     JB 27-11-2022 (Revisat)                                    *
+!     *     JB 27-02-2026 (Revisat i extracte de conf. )               *
 !     *                                                                *
 !     ******************************************************************
 !
@@ -35,41 +36,33 @@
       INTEGER (kind=2), dimension (:,:), allocatable :: S
       integer (kind=2) :: Sold
 !
-!     Vector for periodic boundary conditions
+!     Vector per les condicions periodiques de contorn
 !
       INTEGER (kind=4), dimension (:), allocatable :: PBC
 !
-!     Calculated variables
+!     Variables per calculs
 !
       integer (kind=4) :: N, MAG,MAGBIS
       double precision ENE, ENEBIS
       INTEGER DE
       integer (kind=4) :: SUMA
 !
-!     Internal indices
+!     Index interns
 !
       integer (kind=4) :: I,J,IJ, IMC, IPAS
 !
-!     Vector with the transitions probabilities
-!
-
-!
-!     External functions
+!     Funcions externes d'ininicialitzacio
 !
       double precision ENERG
       INTEGER (kind=4) :: MAGNE
 !
-!     Name of the output file
+!     arxiu output
 !
       CHARACTER*128 NOM
       CHARACTER*32 sL, sTEMP, sMCTOT
 !
-!     * Starting executable commands
-!
-!
-!     INPUT DATA *************
-!
-!      TEMP=1.5D0
+!     dades per linia de comandes
+!     > IsingSeq  L TEMP MCTOT
 
       print*,"use: $ IsingSeq  L TEMP MCTOT"
 
@@ -85,15 +78,14 @@
       allocate(PBC(0:L+1))
       
       Write(NOM,'("resultsSeq/SIM-L",I0,"-TEMP",F5.3)') L,TEMP
-!      write(NOM,"(A,I0)") "SIM-L",L
 !
-!     CALCULATED VARIABLES
+!     Variables calculades
 ! 
-!     Total number of particles
+!     Nombre total de particules
 ! 
       N=L*L
 !
-!     Periodic boundary conditions
+!     Cond. periodiques de contorn
 !
       PBC(0)=L
       PBC(L+1)=1
@@ -101,21 +93,21 @@
          PBC(i)=i
       enddo
 !
-!     vector with the transitions probabilities
+!     Probabilitats de transicio no trivial
 !
       w4 = exp(-4.0d0 / TEMP)
       w8 = exp(-8.0d0 / TEMP)
 !
-!     Open the output files
+!     Obre output files
 !
       open(UNIT=12,FILE=trim(nom)//"_EM.seq")
       open(UNIT=13,FILE=trim(nom)//"_map.conf")
 !
-!     Initialization of the random number generator with SEED
+!     Initializatio del generador amb valor SEED
 !
       CALL init_genrand(SEED)
 !
-!     scan the lattice, generating spins at random
+!     generacio de matriu inicial
 !
 
       DO J=1,L
@@ -151,14 +143,14 @@
 !
       DO IMC=1,MCTOT
 !
-!        Loop of N trials inside each MC step
+!        Loop de passes MC (N intents de canvi)
 !
          DO IPAS = 1,N
 !
-!           Choose a spin at random
+!           Escull spin aleatori
             IJ=int(genrand_real2()*N)
             I  = IJ / L + 1
-            J  = IJ - (I-1)*L + 1   ! en comptes de mod(IJ,L)+1
+            J  = IJ - (I-1)*L + 1  
 
             Sold = S(i,j)
             !
@@ -181,7 +173,7 @@
                     case (8)
                        accept = (genrand_real2() < w8)
                     case default
-                       accept = .false.        ! de {+4,+8} únics positius possibles
+                       accept = .false.        ! de = {+4,+8} únics positius possibles
             end select
             if (accept) then
                S(i,j) = -Sold
@@ -192,19 +184,14 @@
 
 !
 !
-!           End of the N trials
+!          Final de passa MC
 !
          ENDDO
 !
-!        Testing that the energy is correct every MC step
-!        (This part can be suppressed when one has checked that ENE=ENEBIS always)
 !            
-         MAGBIS=MAGNE(S,L)
-         ENEBIS=ENERG(S,L,PBC)
-!         WRITE(*,*) 'MC=',IMC, ' ENERGIA =', ENE, ENEBIS, 'MAGNE =',MAG
-         WRITE(12,*) IMC, ENE, ENEBIS, MAG, MAGBIS, N
+         WRITE(12,*) IMC, ENE, MAG, MAGBIS, N
 !
-!        Final of the MC loop
+!        Bolca la configuracio cada 1000 pasos
 !
       if(mod(IMC,1000).eq.0) then
             do J=1,L
@@ -217,7 +204,7 @@
 
       CLOSE(12)
 !
-!     write the final configuration       
+!     Escriu conf. final       
 !
       do J=1,L
             write(13,*) S(:,J)

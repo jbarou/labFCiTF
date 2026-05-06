@@ -192,6 +192,7 @@
 !        Bolca la configuracio cada 1000 pasos
 !
       if(mod(IMC,1000).eq.0) then
+            WRITE(*,*) 'MC=',IMC, ' ENERGIA =', ENE, 'MAGNE =',MAG
             do J=1,L
                   write(13,*) S(:,J)
             enddo
@@ -199,6 +200,10 @@
             write(13,*) ''
       endif
       ENDDO
+
+
+
+
 
       CLOSE(12)
 !

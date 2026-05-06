@@ -13,26 +13,25 @@
 !     *                                                                *
 !     ******************************************************************
 !
-!     compila
+!     compile with
+!
 !     > gfortran -O3 -o IsingSeq IsingSeq.f90
 !
-!     executa
-!     > ./IsingSeq  L TEMP MCTOT
-!
-!     * declaracio de variables ********************************************
+!     * Variable declaration ********************************************
 !
       IMPLICIT NONE
 !
 !     Input data
 !
       integer (kind=4) :: L
+!!      PARAMETER (L=48)
       double precision TEMP, W4, W8
       integer (kind=4) :: SEED
       integer (kind=4) :: MCTOT
       double precision genrand_real2
       logical accept
 !
-!     Matriu de spins
+!     Spin matrix
 !
       INTEGER (kind=2), dimension (:,:), allocatable :: S
       integer (kind=2) :: Sold
@@ -43,8 +42,8 @@
 !
 !     Variables per calculs
 !
-      integer (kind=4) :: N, MAG,MAGBIS
-      double precision ENE, ENEBIS
+      integer (kind=4) :: N, MAG
+      double precision ENE
       INTEGER DE
       integer (kind=4) :: SUMA
 !
@@ -63,7 +62,7 @@
       CHARACTER*32 sL, sTEMP, sMCTOT
 !
 !     dades per linia de comandes
-!
+!     > IsingSeq  L TEMP MCTOT
 
       print*,"use: $ IsingSeq  L TEMP MCTOT"
 
@@ -132,12 +131,10 @@
 !     Both should always give the same results
 !
       ENE=ENERG(S,L,PBC)
-      ENEBIS=ENE
       MAG=MAGNE(S,L)
-      MAGBIS=MAG
       IMC=0
 
-      WRITE(*,*) 'MC=',IMC, ' ENERGIA =', ENE, ENEBIS, 'MAGNE =',MAG
+      WRITE(*,*) 'MC=',IMC, ' ENERGIA =', ENE, 'MAGNE =',MAG
       WRITE(12,*) IMC, ENE, MAG, N
 !
 !     Main Monte Carlo loop
@@ -190,7 +187,7 @@
          ENDDO
 !
 !            
-         WRITE(12,*) IMC, ENE, MAG, MAGBIS, N
+         WRITE(12,*) IMC, ENE, MAG, N
 !
 !        Bolca la configuracio cada 1000 pasos
 !

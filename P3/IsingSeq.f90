@@ -1,7 +1,7 @@
 !C23456789012345678901234567890123456789012345678901234567890123456789012
 !     ******************************************************************
 !     *                                                                *
-!     *     MC1-2.f                                                    *
+!     *     IsingSeq.f                                                 *
 !     *     IMPROVED VERSION                                           *
 !     *     MONTE CARLOS SIMULATION OF THE 2D ISING MODEL              *
 !     *     METROPOLIS ALGORITHM                                       *
@@ -25,7 +25,7 @@
 !
       integer (kind=4) :: L
 !!      PARAMETER (L=48)
-      double precision TEMP, W4, W8
+      double precision TEMP, t4, t8
       integer (kind=4) :: SEED
       integer (kind=4) :: MCTOT
       double precision genrand_real2
@@ -59,20 +59,22 @@
 !     arxiu output
 !
       CHARACTER*128 NOM
-      CHARACTER*32 sL, sTEMP, sMCTOT
+      CHARACTER*32 sL, sTEMP, sMCTOT, sSEED
 !
 !     dades per linia de comandes
 !     > IsingSeq  L TEMP MCTOT
 
-      print*,"use: $ IsingSeq  L TEMP MCTOT"
+      print*,"use: $ IsingSeq  L TEMP MCTOT SEED"
 
       CALL GETARG(1 , sL)
       CALL GETARG(2 , sTEMP)
       CALL GETARG(3 , sMCTOT)
+      CALL GETARG(4 , sSEED)
       
       READ (sL,*) L
       READ (sTEMP,*) TEMP
       READ (sMCTOT,*) MCTOT
+      READ (sSEED,*) SEED
       
       allocate(S(1:L,1:L))
       allocate(PBC(0:L+1))
@@ -95,8 +97,8 @@
 !
 !     Probabilitats de transicio no trivial
 !
-      w4 = exp(-4.0d0 / TEMP)
-      w8 = exp(-8.0d0 / TEMP)
+      t4 = exp(-4.0d0 / TEMP)
+      t8 = exp(-8.0d0 / TEMP)
 !
 !     Obre output files
 !
@@ -105,7 +107,7 @@
 !
 !     Initializatio del generador amb valor SEED
 !
-      CALL init_genrand(SEED)
+      CALL init_genrand(1235+SEED*2)
 !
 !     generacio de matriu inicial
 !
@@ -124,11 +126,6 @@
       write(13,*) ''
 !
 !     Initial energy
-!
-!     In this first version of the code, we will keep two variables ENE and ENEBIS accounting for
-!     the energy of the system. The variable ENE will be updated every time that we flip a spin,
-!     the variable ENEBIS will be computed at the end of each MC step.
-!     Both should always give the same results
 !
       ENE=ENERG(S,L,PBC)
       MAG=MAGNE(S,L)
@@ -167,9 +164,9 @@
                     case (: 0)                ! <= 0
                        accept = .true.
                     case (4)
-                       accept = (genrand_real2() < w4)
+                       accept = (genrand_real2() < t4)
                     case (8)
-                       accept = (genrand_real2() < w8)
+                       accept = (genrand_real2() < t8)
                     case default
                        accept = .false.        ! de = {+4,+8} únics positius possibles
             end select

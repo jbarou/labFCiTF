@@ -1,7 +1,7 @@
 !C23456789012345678901234567890123456789012345678901234567890123456789012
 !     ******************************************************************
 !     *                                                                *
-!     *     IsingSeq.f                                                 *
+!     *     MC1-2.f                                                    *
 !     *     IMPROVED VERSION                                           *
 !     *     MONTE CARLOS SIMULATION OF THE 2D ISING MODEL              *
 !     *     METROPOLIS ALGORITHM                                       *
@@ -46,6 +46,11 @@
       double precision ENE
       INTEGER DE
       integer (kind=4) :: SUMA
+!
+!     Lectura de temps
+!      
+      REAL*4 TIME1,TIME2
+      CHARACTER*64 DATE, cmd
 !
 !     Index interns
 !
@@ -102,8 +107,34 @@
 !
 !     Obre output files
 !
-      open(UNIT=12,FILE=trim(nom)//"_EM.seq")
-      open(UNIT=13,FILE=trim(nom)//"_map.conf")
+      open(UNIT=12,FILE=trim(nom)//"_EM.seq", status="unknown", action="write")
+      open(UNIT=13,FILE=trim(nom)//"_map.conf", status="unknown", action="write")
+      open(UNIT=14,FILE="logIsingSeq.out",  status="unknown", position='append', action="write")
+ 
+      CALL CPU_TIME(TIME1)      
+      CALL FDATE(DATE) 
+      call get_command(cmd)
+      
+
+      WRITE (14,*) ""
+      WRITE (14,*) "========================="
+      WRITE (14,*) trim(DATE)
+      WRITE (14,*) trim(cmd)
+      WRITE (14,*) ""
+      WRITE (14,*) "L = ", L, "TEMP = ", TEMP, "MCTOT= " ,MCTOT , "SEED = ", SEED
+      WRITE (14,*) "========================="      
+      WRITE (14,*) ""
+
+
+      WRITE (*,*) ""
+      WRITE (*,*) "========================="
+      WRITE (*,*) trim(DATE)
+      WRITE (*,*) trim(cmd)
+      WRITE (*,*) ""
+      WRITE (*,*) "L = ", L, "TEMP = ", TEMP, "MCTOT= " ,MCTOT , "SEED = ", SEED
+      WRITE (*,*) "========================="      
+      WRITE (*,*) ""
+
 !
 !     Initializatio del generador amb valor SEED
 !
@@ -131,7 +162,8 @@
       MAG=MAGNE(S,L)
       IMC=0
 
-      WRITE(*,*) 'MC=',IMC, ' ENERGIA =', ENE, 'MAGNE =',MAG
+      WRITE(*,*) 'MC=',IMC, ' ENERGIA =', ENE, 'MAGNE =',MAG      
+      WRITE(14,*) 'MC=',IMC, ' ENERGIA =', ENE, 'MAGNE =',MAG
       WRITE(12,*) IMC, ENE, MAG, N
 !
 !     Main Monte Carlo loop
@@ -190,6 +222,7 @@
 !
       if(mod(IMC,1000).eq.0) then
             WRITE(*,*) 'MC=',IMC, ' ENERGIA =', ENE, 'MAGNE =',MAG
+            WRITE(14,*) 'MC=',IMC, ' ENERGIA =', ENE, 'MAGNE =',MAG
             do J=1,L
                   write(13,*) S(:,J)
             enddo
@@ -212,6 +245,27 @@
       
       CLOSE(13)
 
+      CALL CPU_TIME(TIME2)
+
+      CALL FDATE(DATE)
+      
+      WRITE (14,*) ""
+      WRITE (14,*) DATE
+      WRITE (14,*) ""
+      WRITE (14,*) 'CPUTIME = ', TIME2-TIME1
+      WRITE (14,*) ""
+      WRITE (14,*) "========================="      
+      WRITE (14,*) ""
+
+
+      WRITE (*,*) ""
+      WRITE (*,*) DATE
+      WRITE (*,*) ""
+      WRITE (*,*) 'CPUTIME = ', TIME2-TIME1
+      WRITE (*,*) ""
+      WRITE (*,*) "========================="      
+      WRITE (*,*) ""
+      
       STOP
        
       END

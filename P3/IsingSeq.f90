@@ -25,7 +25,7 @@
 !
       integer (kind=4) :: L
 !!      PARAMETER (L=48)
-      double precision TEMP, t4, t8
+      double precision TEMP, q4, q8
       integer (kind=4) :: SEED
       integer (kind=4) :: MCTOT
       double precision genrand_real2
@@ -102,8 +102,8 @@
 !
 !     Probabilitats de transicio no trivial
 !
-      t4 = exp(-4.0d0 / TEMP)
-      t8 = exp(-8.0d0 / TEMP)
+      q4 = exp(-4.0d0 / TEMP)
+      q8 = exp(-8.0d0 / TEMP)
 !
 !     Obre output files
 !
@@ -196,9 +196,9 @@
                     case (: 0)                ! <= 0
                        accept = .true.
                     case (4)
-                       accept = (genrand_real2() < t4)
+                       accept = (genrand_real2() < q4)
                     case (8)
-                       accept = (genrand_real2() < t8)
+                       accept = (genrand_real2() < q8)
                     case default
                        accept = .false.        ! de = {+4,+8} únics positius possibles
             end select

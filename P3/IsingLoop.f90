@@ -58,7 +58,7 @@ program IsingLoop
 !
 !     Matriu probabilitats de transicio
 !
-      DOUBLE PRECISION  :: w4, w8
+      DOUBLE PRECISION  :: q4, q8
       logical :: accept
 !
 !     Variables per fer els promitjos d' interes
@@ -160,8 +160,8 @@ program IsingLoop
       !     dos unics valors dínteres per a les probabilitats de transició (DE=4,8)
       !
 
-            w4 = exp(-4.0d0 / TEMP)
-            w8 = exp(-8.0d0 / TEMP)
+            q4 = exp(-4.0d0 / TEMP)
+            q8 = exp(-8.0d0 / TEMP)
 
       !
       !     Posem a zero els promitjos d'interes
@@ -182,7 +182,7 @@ program IsingLoop
 
             ! --- Bucle de configuracions (paral·lel si -fopenmp; serial si no)
             !$omp parallel default(none) &
-            !$omp& shared(L,PBC,TEMP,w4,w8,N,MCINI,MCD,MCTOT,NCONF,ITEMP, &
+            !$omp& shared(L,PBC,TEMP,q4,q8,N,MCINI,MCD,MCTOT,NCONF,ITEMP, &
             !$omp&        MEAN_E,M2_E,COUNT_E,COUNT_AM,M2_AM, MEAN_AM) &
             !$omp& private(ICONF,I,J,IPAS,IMC,S,ENE,MAG,SUMA,DE,accept, &
             !$omp&         IJ,Sold,TCOUNT,TMEAN_E,TM2_E,TM2_AM,TMEAN_AM,DELTA)
@@ -242,9 +242,9 @@ program IsingLoop
                              case (:0)                   ! DE <= 0
                                accept = .true.
                              case (4)
-                               accept = (genrand_real2() .LT. w4)
+                               accept = (genrand_real2() .LT. q4)
                              case (8)
-                               accept = (genrand_real2() .LT. w8)
+                               accept = (genrand_real2() .LT. q8)
                              case default
                                accept = .false.          ! DE {+4,+8} únics positius possibles
                            end select
